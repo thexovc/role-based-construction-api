@@ -12,7 +12,7 @@ import { Roles } from '../auth/guard/roles.decorator';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { Role } from 'generated/prisma';
+import { Role } from '@prisma/client';
 
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
