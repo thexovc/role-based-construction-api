@@ -7,11 +7,12 @@ import {
   Request,
   ForbiddenException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guard/role.guard';
 import { Roles } from '../auth/guard/roles.decorator';
-import { Role } from '@prisma/client';
 import { ProductsService } from './products.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { Role } from 'generated/prisma';
 
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -21,11 +22,11 @@ export class ProductsController {
   @Post()
   @Roles(Role.VENDOR)
   async createProduct(
-    @Body() data: { name: string; description: string; price: number },
+    @Body() createProductDto: CreateProductDto,
     @Request() req,
   ) {
     return this.productsService.createProduct({
-      ...data,
+      ...createProductDto,
       vendorId: req.user.id,
     });
   }
