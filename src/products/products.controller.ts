@@ -6,11 +6,13 @@ import {
   UseGuards,
   Request,
   ForbiddenException,
+  Query,
 } from '@nestjs/common';
 import { RolesGuard } from '../auth/guard/role.guard';
 import { Roles } from '../auth/guard/roles.decorator';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { Role } from '@prisma/client';
 
@@ -32,24 +34,22 @@ export class ProductsController {
   }
 
   @Get()
-  async getAllProducts(@Request() req) {
-    // Buyers can see all products
+  async getAllProducts(@Request() req, @Query() paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+
     if (req.user.role === Role.BUYER) {
-      return this.productsService.getProducts();
-    }
-    // Vendors can only see their own products
-    else if (req.user.role === Role.VENDOR) {
-      return this.productsService.getProductsByVendor(req.user.id);
-    }
-    // Riders shouldn't access products
-    else {
+      return this.productsService.getProducts(page, limit);
+    } else if (req.user.role === Role.VENDOR) {
+      return this.productsService.getProductsByVendor(req.user.id, page, limit);
+    } else {
       throw new ForbiddenException('Access denied');
     }
   }
 
   @Get('my-products')
   @Roles(Role.VENDOR)
-  async getMyProducts(@Request() req) {
-    return this.productsService.getProductsByVendor(req.user.id);
+  async getMyProducts(@Request() req, @Query() paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    return this.productsService.getProductsByVendor(req.user.id, page, limit);
   }
 }
