@@ -17,6 +17,7 @@ async function bootstrap() {
       'http://localhost:5174',
       'http://localhost:3000',
       'http://localhost:3001',
+      "https://construction-app-web-demo.vercel.app"
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
