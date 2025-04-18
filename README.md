@@ -87,6 +87,7 @@ PORT=3000
 src/
 ├── auth/           # Authentication module
 ├── products/       # Products module
+├── users/          # Users module
 ├── prisma/         # Prisma configuration
 ├── main.ts         # Application entry point
 └── app.module.ts   # Root module
