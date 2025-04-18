@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,6 +11,8 @@ import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
+  private readonly SALT_ROUNDS = 10;
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -14,10 +20,15 @@ export class AuthService {
   ) {}
 
   async register(email: string, password: string, role: Role) {
-    const hashedPassword = await bcrypt.hash(
-      password,
-      Number(this.configService.get<number>('BCRYPT_SALT_ROUNDS', 10)),
-    );
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
 
     const user = await this.prisma.user.create({
       data: {
@@ -27,8 +38,20 @@ export class AuthService {
       },
     });
 
-    const token = this.jwtService.sign({ sub: user.id });
-    return { token };
+    const token = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
   async login(email: string, password: string) {
@@ -45,7 +68,19 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = this.jwtService.sign({ sub: user.id });
-    return { token };
+    const token = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 }
