@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,8 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async register(email: string, password: string, role: Role) {
+  async register(registerDto: RegisterDto, role: Role) {
+    const { email, fullName, password } = registerDto;
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -33,6 +35,7 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         email,
+        fullName,
         password: hashedPassword,
         role,
       },

@@ -10,29 +10,17 @@ export class AuthController {
 
   @Post('register/buyer')
   async registerBuyer(@Body() registerDto: Omit<RegisterDto, 'role'>) {
-    return this.authService.register(
-      registerDto.email,
-      registerDto.password,
-      Role.BUYER,
-    );
+    return this.authService.register(registerDto, Role.BUYER);
   }
 
   @Post('register/vendor')
   async registerVendor(@Body() registerDto: Omit<RegisterDto, 'role'>) {
-    return this.authService.register(
-      registerDto.email,
-      registerDto.password,
-      Role.VENDOR,
-    );
+    return this.authService.register(registerDto, Role.VENDOR);
   }
 
   @Post('register/rider')
   async registerRider(@Body() registerDto: Omit<RegisterDto, 'role'>) {
-    return this.authService.register(
-      registerDto.email,
-      registerDto.password,
-      Role.RIDER,
-    );
+    return this.authService.register(registerDto, Role.RIDER);
   }
 
   @Post('login')
